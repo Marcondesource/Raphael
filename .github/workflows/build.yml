@@ -3,6 +3,9 @@ name: Build Kernel
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,24 +21,17 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: false
-   
+    
       - name: Install required packages
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-                       build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
-                       zstd dwarves cpio python-is-python3 device-tree-compiler curl ccache
-    
+                   build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
+                   zstd dwarves cpio python-is-python3 device-tree-compiler curl ccache zip
+
       - name: Checkout Kernel
         run: |
           git clone -b pixel --recursive https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
-
-     # - name: Download patches and apply
-     #   working-directory: kernel
-     #   run: |
-     #    cd KernelSU
-     #     wget https://raw.githubusercontent.com/MatrixhKal/KSU-PATCHES/refs/heads/main/fix_umount_manager.patch
-     #     patch -p1 <fix_umount_manager.patch
 
       - name: Setup AOSP Clang
         run: |
@@ -57,7 +53,7 @@ jobs:
           export ARCH=arm64
           export SUBARCH=arm64
           export USE_CCACHE=1
-          export CC=ccache clang
+          export CC="ccache clang"
           export LLVM=1
           export LLVM_IAS=1
           export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -67,29 +63,27 @@ jobs:
           
           make -j$(nproc --all) Image.gz-dtb O=out
 
-      - name: Collect kernel modules
-        working-directory: kernel
+      - name: Prepare Release Files
         run: |
-          mkdir -p ~/modules-out
-          mkdir -p ~/modules-out/dlkm
-    
-          find out/ -type f -name "*.ko" -exec cp {} ~/modules-out/ \;
-          find ~/modules-out/ -maxdepth 1 -type f -name "*_dlkm.ko" -exec mv {} ~/modules-out/dlkm/ \;
+          mkdir -p output
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb output/
+          # Zipar a pasta DTS para facilitar o download na release
+          zip -r output/Device-Tree-Source.zip kernel/out/arch/arm64/boot/dts
 
-      - name: Upload kernel modules
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: Kernel-Modules
-          path: ~/modules-out
-
-      - name: Upload Device Tree Source (DTS)
-        uses: actions/upload-artifact@v4
-        with:
-          name: Device-Tree-Source-DTS
-          path: kernel/out/arch/arm64/boot/dts
-
-      - name: Upload Image
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kernel-Image
-          path: kernel/out/arch/arm64/boot/Image.gz-dtb
+          tag_name: kernel-${{ github.run_number }}
+          name: Kernel Build - Run ${{ github.run_number }}
+          body: |
+            ### Kernel Build Information
+            - **Device:** Motorola SM6225
+            - **Build Number:** ${{ github.run_number }}
+            - **Commit:** ${{ github.sha }}
+          draft: false
+          prerelease: false
+          files: |
+            output/Image.gz-dtb
+            output/Device-Tree-Source.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
