@@ -10,18 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Remove unused packages
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-    
+    steps: 
       - name: Install required packages
         run: |
           sudo apt-get update -y
