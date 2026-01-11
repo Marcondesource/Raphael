@@ -33,11 +33,6 @@ jobs:
         run: |
           make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config
 
-      - name: KernelSU Setup
-        working-directory: kernel
-        run: |
-          curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-
       - name: Build Kernel
         working-directory: kernel
         run: |
