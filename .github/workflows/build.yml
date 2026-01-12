@@ -20,7 +20,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b continuous-inline --recursive https://github.com/pixelthrived/android_kernel_motorola_sm6225 --depth=1 kernel
+          git clone -b lineage-23.0 --recursive https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
       - name: Setup AOSP Clang
         run: |
