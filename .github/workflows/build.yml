@@ -20,7 +20,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b Ayanami --recursive https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
+          git clone -b Ayanami-wip --recursive https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
       - name: Setup AOSP Clang
         run: |
