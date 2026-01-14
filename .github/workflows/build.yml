@@ -54,7 +54,7 @@ jobs:
       - name: Prepare Release Files
         run: |
           mkdir -p output
-          cp kernel/out/arch/arm64/boot/Image.gz output/
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb output/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
