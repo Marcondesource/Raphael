@@ -49,7 +49,7 @@ jobs:
           export LD=ld.lld
 
           make -j$(nproc --all) O=out rhode_defconfig
-          make -j$(nproc --all) O=out
+          make -j$(nproc --all) O=out Image.gz-dtb
 
       - name: Prepare Release Files
         run: |
