@@ -38,10 +38,10 @@ jobs:
         working-directory: kernel
         run: |
           export ARCH=arm64
-          export CC=clang
+          #export CC=clang
           export LLVM=1
           export LLVM_IAS=1
-          export CLANG_TRIPLE=aarch64-linux-gnu-
+          #export CLANG_TRIPLE=aarch64-linux-gnu-
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
