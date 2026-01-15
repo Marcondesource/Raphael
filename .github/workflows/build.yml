@@ -37,10 +37,17 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
+          export PATH=~/clang/bin:$PATH
           export ARCH=arm64
-          #export CC=clang
+          export CC=clang
           export LLVM=1
           export LLVM_IAS=1
+          export AS=llvm-as
+          export AR=llvm-ar
+          export NM=llvm-nm
+          export OBJCOPY=llvm-objcopy
+          export OBJDUMP=llvm-objdump
+          export STRIP=llvm-strip
           #export CLANG_TRIPLE=aarch64-linux-gnu-
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
