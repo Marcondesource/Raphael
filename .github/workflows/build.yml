@@ -68,6 +68,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            output/Image.gz
+            output/Image.gz-dtb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
