@@ -45,7 +45,7 @@ jobs:
           export AR=llvm-ar
           export NM=llvm-nm
           export OBJCOPY=llvm-objcopy
-          exoort OBJDUMP=llvm-objdump
+          export OBJDUMP=llvm-objdump
           export STRIP=llvm-strip
           #export CLANG_TRIPLE=aarch64-linux-gnu-
           export CROSS_COMPILE=aarch64-linux-gnu-
