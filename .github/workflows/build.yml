@@ -63,7 +63,7 @@ jobs:
           cp kernel/out/arch/arm64/boot/dtbo.img output/
           cp kernel/out/arch/arm64/boot/dtb.img  output/
 
-          zip -r out.zip kernel/out/
+          zip -r out.zip kernel/out/arch/arm64/
           mv kernel/out.zip output/
 
       - name: Create GitHub Release
