@@ -56,16 +56,12 @@ jobs:
           make -j$(nproc --all) O=out rhode_defconfig
           make -j$(nproc --all) O=out
 
-      - name: DTBS?
-        working-directory: kernel
-        run: |
-          make -j$(nproc --all) O=out dtbs
-
       - name: Prepare Release Files
         run: |
           mkdir -p output && 
-          cat $(find kernel/out/arch/arm64/boot/dts -type f -name "*.dtb" | sort) > output/dtb.img
           cp kernel/out/arch/arm64/boot/Image.gz output/
+          cp kernel/out/arch/arm64/boot/dtbo.img output/
+          cp kernel/out/arch/arm64/boot/dtb.img  output/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -80,6 +76,7 @@ jobs:
           prerelease: false
           files: |
             output/Image.gz
+            output/dtbo.img
             output/dtb.img
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
