@@ -60,8 +60,8 @@ jobs:
         run: |
           mkdir -p output && 
           cp kernel/out/arch/arm64/boot/Image.gz output/
-          cp kernel/out/arch/arm64/boot/dtbo.img output/
-          cp kernel/out/arch/arm64/boot/dtb.img  output/
+          #cp kernel/out/arch/arm64/boot/dtbo.img output/
+          #cp kernel/out/arch/arm64/boot/dtb.img  output/
 
           zip -r out.zip kernel/out/arch/arm64/
           mv out.zip output/
