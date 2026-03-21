@@ -37,7 +37,7 @@ jobs:
       - name: Setup KernelSU
         working-directory: kernel
         run: |
-          curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/master/kernel/setup.sh" | bash -s master
+          curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/master/kernel/setup.sh" | bash -s 2d54667db6d50b301b56b6202c3e8eafd39758f1
  
       - name: Build Kernel
         working-directory: kernel
