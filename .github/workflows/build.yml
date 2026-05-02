@@ -34,18 +34,18 @@ jobs:
       - name: Generate defconfig
         working-directory: kernel
         run: |
-          export PATH=~/clang/bin:$PATH
-          export ARCH=arm64
-          export SUBARCH=arm64
-          export CC=clang
-          export LLVM=1
-          export LLVM_IAS=1
-          export CLANG_TRIPLE=aarch64-linux-gnu-
-          export CROSS_COMPILE=aarch64-linux-gnu-
-          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
-          export LD=ld.lld
+          #export PATH=~/clang/bin:$PATH
+          #export ARCH=arm64
+          #export SUBARCH=arm64
+          #export CC=clang
+          #export LLVM=1
+          #export LLVM_IAS=1
+          #export CLANG_TRIPLE=aarch64-linux-gnu-
+          #export CROSS_COMPILE=aarch64-linux-gnu-
+          #export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+          #export LD=ld.lld
           
-          make O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config
+          make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config
           
       - name: Setup KernelSU
         working-directory: kernel
