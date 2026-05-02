@@ -31,6 +31,7 @@ jobs:
           #wget https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r574158-14475230/clang-r574158.tar.gz -O clang.tar.gz
           #wget https://github.com/ZyCromerZ/Clang/releases/download/23.0.0git-20260119-release/Clang-23.0.0git-20260119.tar.gz -O clang.tar.gz
           tar -xf clang.tar.gz
+          rm clang.tar.gz
 
       - name: Generate defconfig
         working-directory: kernel
