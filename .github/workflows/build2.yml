@@ -9,85 +9,78 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    # ⭐ Otimização 1: Timeout explícito
-    timeout-minutes: 120
 
     steps:
-      # ⭐ Otimização 2: Setup ccache primeiro
-      - name: Install build dependencies
+      - name: Free up disk space
         run: |
+          echo "=== Disk usage before cleanup ==="
+          df -h
+          
+          # Remove unnecessary packages
+          sudo apt-get remove -y \
+            '^ghc-*' \
+            '^dotnet-*' \
+            '^llvm-*' \
+            'php*' \
+            'mysql-server*' \
+            'postgresql*' \
+            'openjdk-*' \
+            'adoptopenjdk-*' \
+            'google-cloud-sdk' \
+            'azure-cli' \
+            'powershell' \
+            'mono-*' \
+            'ruby*' \
+            'default-jdk*' \
+            'esl-erlang' || true
+          
+          # Clean apt cache
+          sudo apt-get autoremove -y
+          sudo apt-get autoclean -y
+          sudo apt-get clean
+          
+          # Remove Docker images
+          docker rmi -f $(docker images -aq) || true
+          
+          # Remove large directories
+          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /opt/google/chrome
+          sudo rm -rf /opt/microsoft/powershell
+          
+          echo "=== Disk usage after cleanup ==="
+          df -h
+
+      - name: Install required packages
+        run: |
+          sudo sed -i 's|http://archive.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' /etc/apt/sources.list
+          sudo apt update -y
           sudo apt-get update -y
           sudo apt-get install -y \
-            build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
-            zstd dwarves cpio python-is-python3 device-tree-compiler curl zip \
-            ccache  # Adicionado ccache
+                   build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
+                   zstd dwarves cpio python-is-python3 device-tree-compiler curl zip
 
-      # ⭐ Otimização 3: Configurar ccache
-      - name: Configure ccache
+      - name: Checkout Kernel
         run: |
-          ccache --max-size=10G
-          ccache --set-config=compression=true
-          ccache --set-config=compression_level=3
-          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-          echo "CCACHE_COMPRESS=1" >> $GITHUB_ENV
-          echo "CCACHE_SLOPPINESS=time_macros,include_file_mtime" >> $GITHUB_ENV
+          git clone -b Ayanami-rc2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
-      # ⭐ Otimização 4: Cache mais agressivo
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.ccache
-          key: kernel-ccache-${{ github.run_id }}
-          restore-keys: |
-            kernel-ccache-
-            ccache-
-
-      - name: Checkout Kernel (Otimizado)
-        run: |
-          # Mantém depth=1 que já é bom, mas adiciona --no-tags
-          git clone -b Ayanami-merge https://github.com/MatrixhKa/android_kernel_motorola_sm6225 \
-            --depth=1 --no-tags --single-branch kernel
-
-      # ⭐ Otimização 5: Download do Clang com cache
-      - name: Cache Clang
-        id: clang-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/clang
-          key: clang-r574158-${{ runner.os }}
-          
       - name: Setup AOSP Clang
-        if: steps.clang-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/clang && cd ~/clang
-          wget https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r574158-14475230/clang-r574158.tar.gz -O clang.tar.gz
-          tar -xf clang.tar.gz && rm clang.tar.gz
+          wget https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r596125-15241605/clang-r596125.tar.gz -O clang.tar.gz
+          tar -xf clang.tar.gz
+          rm -f clang.tar.gz
 
       - name: Generate defconfig
         working-directory: kernel
         run: |
-          # ⭐ Adiciona CCACHE diretamente no comando
-          ccache make ARCH=arm64 O=out \
-            vendor/bengal-perf_defconfig \
-            vendor/ext_config/moto-bengal.config \
-            vendor/ext_config/rhode-default.config
-          
-      - name: Setup KernelSU
-        working-directory: kernel
-        run: |
-          # Mantém seu script original
-          curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s 9bb2d6c5099f124f56a156f66308d590389b5064
-
-      # ⭐ Otimização 6: Compilação com ccache e otimização de paralelismo
-      - name: Build Kernel
-        working-directory: kernel
-        run: |
           export PATH=~/clang/bin:$PATH
-          export CCACHE_DIR=$HOME/.ccache
-          export CC="ccache clang"  # Integração direta com ccache
           export ARCH=arm64
           export SUBARCH=arm64
+          export CC=clang
           export LLVM=1
           export LLVM_IAS=1
           export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -95,30 +88,33 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
           
-          # ⭐ Obtém número de CPUs e limita para não sobrecarregar
-          NPROC=$(nproc)
-          # GitHub Actions tem 2 cores, usar ambos
-          make -j$NPROC O=out
+          make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config
           
-          # Mostra estatísticas do ccache
-          ccache -s
+      - name: Setup KernelSU
+        working-directory: kernel
+        run: |
+          curl -LSs "https://raw.githubusercontent.com/backslashxx/KernelSU/refs/heads/master/kernel/setup.sh" | bash -s main
 
-      # ⭐ Otimização 7: Criação eficiente de release
+      - name: Build Kernel
+        working-directory: kernel
+        run: |
+          export PATH=~/clang/bin:$PATH
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export CC=clang
+          export LLVM=1
+          export LLVM_IAS=1
+          export CLANG_TRIPLE=aarch64-linux-gnu-
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+          export LD=ld.lld
+
+          make -j$(nproc --all) O=out
+
       - name: Prepare Release Files
         run: |
-          mkdir -p output
-          
-          # Verifica se os arquivos existem antes de copiar
-          [ -f kernel/out/arch/arm64/boot/Image.gz ] && cp kernel/out/arch/arm64/boot/Image.gz output/
-          [ -f kernel/out/arch/arm64/boot/dtbo.img ] && cp kernel/out/arch/arm64/boot/dtbo.img output/
-          [ -f kernel/out/arch/arm64/boot/dtb.img ] && cp kernel/out/arch/arm64/boot/dtb.img output/
-          
-          # ⭐ Cria zip apenas se necessário e compacta eficientemente
-          if ls kernel/out/arch/arm64/*.img 2>/dev/null | grep -q .; then
-            cd kernel/out/arch/arm64/
-            zip -qr -5 ../../../../output/out.zip .
-            cd -
-          fi
+          mkdir -p output && 
+          cp kernel/out/arch/arm64/boot/Image.gz output/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -129,13 +125,9 @@ jobs:
             ### Kernel Build Information
             - **Build Number:** ${{ github.run_number }}
             - **Commit:** ${{ github.sha }}
-            - **Build Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
           draft: false
           prerelease: false
           files: |
             output/Image.gz
-            output/out.zip
-            # output/dtbo.img  # Descomente se disponível
-            # output/dtb.img   # Descomente se disponível
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
