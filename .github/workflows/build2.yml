@@ -45,7 +45,7 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
           
-          make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config vendor/ayanami_defconfig
+          make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config vendor/ayanami.config
           
       - name: Setup KernelSU
         working-directory: kernel
