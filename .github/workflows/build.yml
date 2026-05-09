@@ -79,10 +79,6 @@ jobs:
         with:
           tag_name: kernel-${{ github.run_number }}
           name: Kernel Build - Run ${{ github.run_number }}
-          body: |
-            ### Kernel Build Information
-            - **Build Number:** ${{ github.run_number }}
-            - **Commit:** ${{ github.sha }}
           draft: false
           prerelease: false
           files: |
