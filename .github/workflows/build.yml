@@ -20,6 +20,16 @@ jobs:
                    build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
                    zstd dwarves cpio python-is-python3 device-tree-compiler curl zip
 
+      - name: Setup ccache
+        run: |
+          sudo apt-get install -y ccache
+          sudo /usr/sbin/update-ccache-symlinks
+          echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
+          source ~/.bashrc
+          ccache -M 5G
+          ccache -o compression=true
+          ccache -s
+
       - name: Checkout Kernel
         run: |
           git clone -b Ayanami-rc2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
@@ -34,10 +44,10 @@ jobs:
       - name: Generate defconfig
         working-directory: kernel
         run: |
-          export PATH=~/clang/bin:$PATH
+          export PATH=~/clang/bin:/usr/lib/ccache:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
-          export CC=clang
+          export CC="ccache clang"
           export LLVM=1
           export LLVM_IAS=1
           export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -56,10 +66,10 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
-          export PATH=~/clang/bin:$PATH
+          export PATH=~/clang/bin:/usr/lib/ccache:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
-          export CC=clang
+          export CC="ccache clang"
           export LLVM=1
           export LLVM_IAS=1
           export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -69,10 +79,14 @@ jobs:
 
           make -j$(nproc --all) O=out
 
+      - name: Show ccache statistics
+        run: |
+          ccache -s
+
       - name: Prepare Release Files
         run: |
           mkdir -p output && 
-          cp kernel/out/arch/arm64/boot/Image.gz output/
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb output/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -82,6 +96,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            output/Image.gz
+            output/Image.gz-dtb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
