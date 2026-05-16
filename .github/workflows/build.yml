@@ -86,7 +86,7 @@ jobs:
       - name: Prepare Release Files
         run: |
           mkdir -p output && 
-          cp kernel/out/arch/arm64/boot/Image.gz-dtb output/
+          cp kernel/out/arch/arm64/boot/Image.gz output/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -96,6 +96,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            output/Image.gz-dtb
+            output/Image.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
