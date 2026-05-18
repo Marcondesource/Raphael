@@ -56,6 +56,7 @@ jobs:
           #export LD=ld.lld
           
           #make ARCH=arm64 O=out vendor/bengal-perf_defconfig vendor/ext_config/moto-bengal.config vendor/ext_config/rhode-default.config vendor/ayanami.config
+          mkdir -p out
           sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config arch/arm64/configs/vendor/ayanami.config
           
       - name: Setup KernelSU
