@@ -32,7 +32,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b Ayanami-rc2-mm https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
+          git clone -b Ayanami-rc2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
       - name: Setup AOSP Clang
         run: |
@@ -45,7 +45,7 @@ jobs:
         working-directory: kernel
         run: |
           mkdir -p out
-          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/devon-default.config arch/arm64/configs/vendor/ayanami.config
+          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config arch/arm64/configs/vendor/ayanami.config
           
       - name: Setup KernelSU
         working-directory: kernel
