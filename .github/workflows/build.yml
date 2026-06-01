@@ -20,16 +20,6 @@ jobs:
                    build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
                    zstd dwarves cpio python-is-python3 device-tree-compiler curl zip
 
-      - name: Setup ccache
-        run: |
-          sudo apt-get install -y ccache
-          sudo /usr/sbin/update-ccache-symlinks
-          echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
-          source ~/.bashrc
-          ccache -M 5G
-          ccache -o compression=true
-          ccache -s
-
       - name: Checkout Kernel
         run: |
           git clone -b Ayanami-rc2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
@@ -37,9 +27,10 @@ jobs:
       - name: Setup AOSP Clang
         run: |
           mkdir -p ~/clang && cd ~/clang
-          wget https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r596125-15241605/clang-r596125.tar.gz -O clang.tar.gz
-          tar -xf clang.tar.gz
-          rm -f clang.tar.gz
+          #wget https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r596125-15241605/clang-r596125.tar.gz -O clang.tar.gz
+          wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/26052026/neutron-clang-26052026.tar.zst -O clang.tar.zst
+          tar -xvf clang.tar.zst
+          rm -f clang.tar.zst
 
       - name: Generate defconfig
         working-directory: kernel
@@ -55,10 +46,10 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
-          export PATH=~/clang/bin:/usr/lib/ccache:$PATH
+          export PATH=~/clang/bin:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
-          export CC="ccache clang"
+          export CC=clang
           export LLVM=1
           export LLVM_IAS=1
           export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -67,10 +58,6 @@ jobs:
           export LD=ld.lld
 
           make -j$(nproc --all) O=out
-
-      - name: Show ccache statistics
-        run: |
-          ccache -s
 
       - name: Prepare Release Files
         run: |
