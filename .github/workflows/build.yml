@@ -14,7 +14,6 @@ jobs:
       - name: Install required packages
         run: |
           sudo sed -i 's|http://archive.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' /etc/apt/sources.list
-          sudo apt update -y
           sudo apt-get update -y
           sudo apt-get install -y \
                    build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
@@ -64,14 +63,41 @@ jobs:
           mkdir -p output && 
           cp kernel/out/arch/arm64/boot/Image.gz output/
 
+      - name: Prepare AnyKernel3
+        run: |
+          git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3
+          cp output/Image.gz AnyKernel3/Image.gz
+
+          cd AnyKernel3
+          zip -r9 ../AnyKernel3-${{ github.run_number }}.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "README.md" \
+            -x "*.zip"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: kernel-${{ github.run_number }}
-          name: Kernel Build - Run ${{ github.run_number }}
-          draft: false
-          prerelease: false
+          name: Ayanami Kernel - Run ${{ github.run_number }}
+          body: |
+            Device: rhode
+            Kernel: Ayanami
+            Compiler: Neutron Clang
+
+            Build #${{ github.run_number }}
           files: |
-            output/Image.gz
+            AnyKernel3-${{ github.run_number }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s \
+            -F chat_id="$TG_CHAT_ID" \
+            -F document=@AnyKernel3-${{ github.run_number }}.zip \
+            -F caption="Ayanami Kernel #${{ github.run_number }}" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendDocument"
