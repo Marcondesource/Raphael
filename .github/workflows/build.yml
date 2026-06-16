@@ -46,7 +46,7 @@ jobs:
           if [ "${{ matrix.device }}" = "rhode" ]; then
             CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/rhode-default.config"
           else
-            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/devon-defconfig"
+            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/devon-default.config"
           fi
           
           sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config $CONFIG_SPECIFIC arch/arm64/configs/vendor/ayanami.config
