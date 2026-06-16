@@ -16,8 +16,8 @@ jobs:
           sudo sed -i 's|http://archive.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' /etc/apt/sources.list
           sudo apt-get update -y
           sudo apt-get install -y \
-                   build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
-                   zstd dwarves cpio python-is-python3 device-tree-compiler curl zip
+                    build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
+                    zstd dwarves cpio python-is-python3 device-tree-compiler curl zip
 
       - name: Checkout Kernel
         run: |
@@ -30,18 +30,19 @@ jobs:
           tar -xvf clang.tar.zst
           rm -f clang.tar.zst
 
-      - name: Generate defconfig
-        working-directory: kernel
-        run: |
-          mkdir -p out
-          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config arch/arm64/configs/vendor/ayanami.config
-          
       - name: Setup KernelSU
         working-directory: kernel
         run: |
           curl -LSs  "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
 
-      - name: Build Kernel
+      # ================= CONFIGURAÇÃO E BUILD: RHODE =================
+      - name: Generate defconfig (Rhode)
+        working-directory: kernel
+        run: |
+          mkdir -p out/rhode
+          sh scripts/kconfig/merge_config.sh -m -O out/rhode/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config arch/arm64/configs/vendor/ayanami.config
+          
+      - name: Build Kernel (Rhode)
         working-directory: kernel
         run: |
           export PATH=~/clang/bin:$PATH
@@ -55,24 +56,50 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
 
-          make -j$(nproc --all) O=out
+          make -j$(nproc --all) O=out/rhode
 
-      - name: Prepare Release Files
+      # ================= CONFIGURAÇÃO E BUILD: DEVON =================
+      - name: Generate defconfig (Devon)
+        working-directory: kernel
         run: |
-          mkdir -p output && 
-          cp kernel/out/arch/arm64/boot/Image.gz output/
-
-      - name: Prepare AnyKernel3
+          mkdir -p out/devon
+          sh scripts/kconfig/merge_config.sh -m -O out/devon/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/devon-defconfig arch/arm64/configs/vendor/ayanami.config
+          
+      - name: Build Kernel (Devon)
+        working-directory: kernel
         run: |
-          git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3
-          cp output/Image.gz AnyKernel3/Image.gz
+          export PATH=~/clang/bin:$PATH
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export CC=clang
+          export LLVM=1
+          export LLVM_IAS=1
+          export CLANG_TRIPLE=aarch64-linux-gnu-
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+          export LD=ld.lld
 
-          cd AnyKernel3
-          zip -r9 ../AnyKernel3-${{ github.run_number }}.zip . \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x "README.md" \
-            -x "*.zip"
+          make -j$(nproc --all) O=out/devon
+
+      # ================= EMPACOTAMENTO DOS ZIPs =================
+      - name: Prepare AnyKernel3 Packages
+        run: |
+          mkdir -p output
+          git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3_base
+
+          # Zip para Rhode
+          cp -r AnyKernel3_base AnyKernel3_rhode
+          cp kernel/out/rhode/arch/arm64/boot/Image.gz AnyKernel3_rhode/Image.gz
+          cd AnyKernel3_rhode
+          zip -r9 ../output/AnyKernel3-rhode-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
+          cd ..
+
+          # Zip para Devon
+          cp -r AnyKernel3_base AnyKernel3_devon
+          cp kernel/out/devon/arch/arm64/boot/Image.gz AnyKernel3_devon/Image.gz
+          cd AnyKernel3_devon
+          zip -r9 ../output/AnyKernel3-devon-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
+          cd ..
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -80,13 +107,14 @@ jobs:
           tag_name: kernel-${{ github.run_number }}
           name: Ayanami Kernel - Run ${{ github.run_number }}
           body: |
-            Device: rhode
+            Devices: rhode & devon
             Kernel: Ayanami
             Compiler: Neutron Clang
 
             Build #${{ github.run_number }}
           files: |
-            AnyKernel3-${{ github.run_number }}.zip
+            output/AnyKernel3-rhode-${{ github.run_number }}.zip
+            output/AnyKernel3-devon-${{ github.run_number }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -97,6 +125,12 @@ jobs:
         run: |
           curl -s \
             -F chat_id="$TG_CHAT_ID" \
-            -F document=@AnyKernel3-${{ github.run_number }}.zip \
-            -F caption="Ayanami Kernel #${{ github.run_number }}" \
+            -F document=@output/AnyKernel3-rhode-${{ github.run_number }}.zip \
+            -F caption="Ayanami Kernel Rhode #${{ github.run_number }}" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendDocument"
+
+          curl -s \
+            -F chat_id="$TG_CHAT_ID" \
+            -F document=@output/AnyKernel3-devon-${{ github.run_number }}.zip \
+            -F caption="Ayanami Kernel Devon #${{ github.run_number }}" \
             "https://api.telegram.org/bot$TG_TOKEN/sendDocument"
