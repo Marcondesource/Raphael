@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        device: [rhode, devon] # Define os dois alvos de build aqui
+        device: [rhode, devon, hawao]
 
     steps:
       - name: Install required packages
@@ -38,13 +38,14 @@ jobs:
         run: |
           curl -LSs  "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
 
-      # Define dinamicamente qual config usar com base no dispositivo da Matrix
       - name: Generate defconfig
         working-directory: kernel
         run: |
           mkdir -p out
           if [ "${{ matrix.device }}" = "rhode" ]; then
             CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/rhode-default.config"
+          elif [ "${{ matrix.device }}" = "hawao" ]; then
+            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/hawao-default.config"
           else
             CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/devon-default.config"
           fi
