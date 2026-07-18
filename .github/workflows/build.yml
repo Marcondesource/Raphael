@@ -55,7 +55,7 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
-          checkout 4925a57655bb
+          git checkout 4925a57655bb
           export PATH=~/clang/bin:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
