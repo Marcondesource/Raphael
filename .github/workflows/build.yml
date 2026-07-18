@@ -67,8 +67,7 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
           
-          sed -i '$a       
-CONFIG_CFI_CLANG=y\nCONFIG_CFI_PERMISSIVE=y' out/.config
+          sed -i "$aCONFIG_CFI_CLANG=y\nCONFIG_CFI_PERMISSIVE=y" out/.config
 
           make -j$(nproc --all) O=out
 
