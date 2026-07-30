@@ -29,7 +29,7 @@ jobs:
       - name: Setup AOSP Clang
         run: |
           mkdir -p ~/clang && cd ~/clang     
-          wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/09062026/neutron-clang-09062026.tar.zst -O clang.tar.zst
+          wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/30072026/neutron-clang-30072026.tar.zst -O clang.tar.zst
           tar -xvf clang.tar.zst
           rm -f clang.tar.zst
 
