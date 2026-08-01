@@ -24,7 +24,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b 16.0 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
+          git clone -b 16.2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
       - name: Setup AOSP Clang
         run: |
