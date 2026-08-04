@@ -19,8 +19,8 @@ jobs:
       - name: Resolve branch and zip name
         id: vars
         run: |
-          if [ "${{ inputs.branch }}" = "bengal-Kona" ]; then
-            echo "kernel_branch=bengal-Kona" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.branch }}" = "bengal-kona" ]; then
+            echo "kernel_branch=bengal-kona" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-rhode" >> "$GITHUB_OUTPUT"
           else
             echo "kernel_branch=Ayanami-rc2" >> "$GITHUB_OUTPUT"
@@ -49,7 +49,7 @@ jobs:
       - name: Setup KernelSU
         working-directory: kernel
         run: |
-          curl -LSs  "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
+          curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
 
       - name: Generate defconfig
         working-directory: kernel
