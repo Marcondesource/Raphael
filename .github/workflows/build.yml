@@ -1,19 +1,32 @@
 name: Build Kernel
-
 on:
   workflow_dispatch:
-
+    inputs:
+      branch:
+        description: 'Kernel branch'
+        required: true
+        type: choice
+        options:
+          - Ayanami-rc2
+          - bengal-kona
+        default: Ayanami-rc2
 permissions:
   contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        device: [rhode, devon, hawao]
-
     steps:
+      - name: Resolve branch and zip name
+        id: vars
+        run: |
+          if [ "${{ inputs.branch }}" = "bengal-Kona" ]; then
+            echo "kernel_branch=bengal-Kona" >> "$GITHUB_OUTPUT"
+            echo "zip_suffix=Kona-rhode" >> "$GITHUB_OUTPUT"
+          else
+            echo "kernel_branch=Ayanami-rc2" >> "$GITHUB_OUTPUT"
+            echo "zip_suffix=rhode" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install required packages
         run: |
           sudo sed -i 's|http://archive.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/mirrors.txt|g' /etc/apt/sources.list
@@ -24,7 +37,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b Ayanami-rc2 https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
+          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/MatrixhKa/android_kernel_motorola_sm6225 --depth=1 kernel
 
       - name: Setup AOSP Clang
         run: |
@@ -42,16 +55,9 @@ jobs:
         working-directory: kernel
         run: |
           mkdir -p out
-          if [ "${{ matrix.device }}" = "rhode" ]; then
-            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/rhode-default.config"
-          elif [ "${{ matrix.device }}" = "hawao" ]; then
-            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/hawao-default.config"
-          else
-            CONFIG_SPECIFIC="arch/arm64/configs/vendor/ext_config/devon-default.config"
-          fi
-          
-          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config $CONFIG_SPECIFIC arch/arm64/configs/vendor/ayanami.config
-          
+
+          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config
+
       - name: Build Kernel
         working-directory: kernel
         run: |
@@ -65,7 +71,6 @@ jobs:
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
-
           make -j$(nproc --all) O=out
 
       - name: Prepare AnyKernel3
@@ -74,7 +79,7 @@ jobs:
           git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3
           cp kernel/out/arch/arm64/boot/Image.gz AnyKernel3/Image.gz
           cd AnyKernel3
-          zip -r9 ../output/AnyKernel3-${{ matrix.device }}-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
+          zip -r9 ../output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -82,13 +87,13 @@ jobs:
           tag_name: kernel-${{ github.run_number }}
           name: Ayanami Kernel - Run ${{ github.run_number }}
           body: |
-            Device: ${{ matrix.device }}
+            Device: rhode
+            Branch: ${{ steps.vars.outputs.kernel_branch }}
             Kernel: Ayanami
             Compiler: Neutron Clang
-
             Build #${{ github.run_number }}
           files: |
-            output/AnyKernel3-${{ matrix.device }}-${{ github.run_number }}.zip
+            output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -99,6 +104,6 @@ jobs:
         run: |
           curl -s \
             -F chat_id="$TG_CHAT_ID" \
-            -F document=@output/AnyKernel3-${{ matrix.device }}-${{ github.run_number }}.zip \
-            -F caption="Ayanami Kernel ${{ matrix.device }} #${{ github.run_number }}" \
+            -F document=@output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip \
+            -F caption="Ayanami Kernel ${{ steps.vars.outputs.zip_suffix }} #${{ github.run_number }}" \
             "https://api.telegram.org/bot$TG_TOKEN/sendDocument"
