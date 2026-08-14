@@ -8,7 +8,7 @@ on:
         type: choice
         options:
           - Ayanami-rc2
-          - bengal-kona
+          - Ayanami-rc2-kona-2
         default: Ayanami-rc2
 permissions:
   contents: write
@@ -20,7 +20,7 @@ jobs:
         id: vars
         run: |
           if [ "${{ inputs.branch }}" = "bengal-kona" ]; then
-            echo "kernel_branch=bengal-kona" >> "$GITHUB_OUTPUT"
+            echo "kernel_branch=Ayanami-rc2-kona-2" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-rhode" >> "$GITHUB_OUTPUT"
           else
             echo "kernel_branch=Ayanami-rc2" >> "$GITHUB_OUTPUT"
