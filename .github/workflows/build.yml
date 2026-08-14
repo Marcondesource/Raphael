@@ -19,7 +19,7 @@ jobs:
       - name: Resolve branch and zip name
         id: vars
         run: |
-          if [ "${{ inputs.branch }}" = "bengal-kona" ]; then
+          if [ "${{ inputs.branch }}" = "Ayanami-rc2-kona-2" ]; then
             echo "kernel_branch=Ayanami-rc2-kona-2" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-rhode" >> "$GITHUB_OUTPUT"
           else
