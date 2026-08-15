@@ -76,7 +76,7 @@ jobs:
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
-          make -j$(nproc --all) O=out
+          make -j$(nproc --all) O=out KCFLAGS="-Wno-error -Wno-enum-enum-cast"
 
       - name: Prepare AnyKernel3
         run: |
