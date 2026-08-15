@@ -58,7 +58,10 @@ jobs:
         run: |
           mkdir -p out
 
-          sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/bengal-perf_defconfig arch/arm64/configs/vendor/ext_config/moto-bengal.config arch/arm64/configs/vendor/ext_config/rhode-default.config arch/arm64/configs/vendor/ayanami.config
+         sh scripts/kconfig/merge_config.sh -m -O out/ \
+            arch/arm64/configs/vendor/sm8150-perf_defconfig \
+            arch/arm64/configs/vendor/xiaomi/sm8150-common.config \
+            arch/arm64/configs/vendor/xiaomi/raphael.config
 
       - name: Build Kernel
         working-directory: kernel
