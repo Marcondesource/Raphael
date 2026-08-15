@@ -48,10 +48,10 @@ jobs:
           tar -xvf clang.tar.zst
           rm -f clang.tar.zst
 
-      - name: Setup KernelSU
-        working-directory: kernel
-        run: |
-          curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
+      #- name: Setup KernelSU
+        #working-directory: kernel
+        #run: |
+          #curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
 
       - name: Generate defconfig
         working-directory: kernel
@@ -76,7 +76,7 @@ jobs:
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export LD=ld.lld
-          make -j$(nproc --all) O=out KCFLAGS="-Wno-error"
+          make -j$(nproc --all) O=out
 
       - name: Prepare AnyKernel3
         run: |
