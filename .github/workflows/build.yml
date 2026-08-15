@@ -41,12 +41,11 @@ jobs:
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
 
-      - name: Setup AOSP Clang
-        run: |
-          mkdir -p ~/clang && cd ~/clang     
-          wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/30072026/neutron-clang-30072026.tar.zst -O clang.tar.zst
-          tar -xvf clang.tar.zst
-          rm -f clang.tar.zst
+         - name: Setup crDroid Clang
+         run: |
+          mkdir -p ~/clang
+          git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r596125.git ~/clang
+          
 
       #- name: Setup KernelSU
         #working-directory: kernel
