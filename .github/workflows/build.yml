@@ -61,7 +61,8 @@ jobs:
             arch/arm64/configs/vendor/sm8150-perf_defconfig \
             arch/arm64/configs/vendor/xiaomi/sm8150-common.config \
             arch/arm64/configs/vendor/xiaomi/raphael.config
-            
+          make O=out ARCH=arm64 olddefconfig
+          
       - name: Build Kernel
         working-directory: kernel
         run: |
