@@ -39,7 +39,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kerne    
+          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel    
       - name: Setup crDroid Clang
         run: |
           mkdir -p ~/clang
