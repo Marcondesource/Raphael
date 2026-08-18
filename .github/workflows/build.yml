@@ -46,10 +46,10 @@ jobs:
           git clone --depth=1 https://github.com/kdrag0n/proton-clang.git ~/clang
           
 
-      #- name: Setup KernelSU
-        #working-directory: kernel
-        #run: |
-          #curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
+      - name: Setup KernelSU
+        working-directory: kernel
+        run: |
+          curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
 
       - name: Generate defconfig
         working-directory: kernel
