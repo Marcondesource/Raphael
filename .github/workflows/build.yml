@@ -54,13 +54,14 @@ jobs:
       - name: Generate defconfig
         working-directory: kernel
         run: |
+          export PATH=~/clang/bin:$PATH
           mkdir -p out
           sh scripts/kconfig/merge_config.sh -m -O out/ \
             arch/arm64/configs/vendor/sm8150-perf_defconfig \
             arch/arm64/configs/vendor/xiaomi/sm8150-common.config \
             arch/arm64/configs/vendor/xiaomi/raphael.config
            echo "CONFIG_CC_STACKPROTECTOR_STRONG=n" >> out/.config
-          make O=out ARCH=arm64 olddefconfig
+           make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 olddefconfig
           
       - name: Build Kernel
         working-directory: kernel
