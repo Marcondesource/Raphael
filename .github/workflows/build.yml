@@ -65,6 +65,7 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
+          make -j$(nproc --all) O=out \
           export PATH=~/clang/bin:$PATH
           export ARCH=arm64 \
           export CC=clang \
@@ -72,14 +73,13 @@ jobs:
           export LLVM_IAS=1 \
           export CROSS_COMPILE=aarch64-linux-gnu- \
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-          export Image.gz-dtb dtbs
-          make -j$(nproc --all) O=out 
+          Image.gz-dtb
 
       - name: Prepare AnyKernel3
         run: |
           mkdir -p output
           git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3
-          cp kernel/out/arch/arm64/boot/Image.gz AnyKernel3/Image.gz
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/Image.gz-dtb
           cd AnyKernel3
           zip -r9 ../output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
 
