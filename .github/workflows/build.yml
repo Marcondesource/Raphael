@@ -40,10 +40,10 @@ jobs:
       - name: Checkout Kernel
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel    
-      - name: Setup crDroid Clang
+      - name: Setup ProtonClang
         run: |
           mkdir -p ~/clang
-          git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r596125.git ~/clang
+          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git ~/clang
           
 
       #- name: Setup KernelSU
