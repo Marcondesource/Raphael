@@ -47,7 +47,7 @@ jobs:
           
             - name: Generate defconfig
         working-directory: kernel
-        run: |
+  run: |
           mkdir -p out
           sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/sm8150-perf_defconfig arch/arm64/configs/vendor/xiaomi/sm8150-common.config arch/arm64/configs/vendor/xiaomi/raphael.config
           echo "CONFIG_CC_STACKPROTECTOR_STRONG=n" >> out/.config
