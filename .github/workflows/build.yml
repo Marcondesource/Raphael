@@ -1,4 +1,4 @@
-Name: Build Kernel
+name: Build Kernel
 on:
   workflow_dispatch:
     inputs:
@@ -25,7 +25,7 @@ jobs:
             echo "kernel_branch=lineage-22.2" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-raphael" >> "$GITHUB_OUTPUT"
           else
-            echo "kernel_branch=lineage-22.2" >> "$GITHUB_OUTPUT"
+            echo "kernel_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=raphael" >> "$GITHUB_OUTPUT"
           fi
 
@@ -42,10 +42,16 @@ jobs:
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
 
       - name: Setup ProtonClang
+        uses: actions/checkout@v4
+        with:
+          repository: kdrag0n/proton-clang
+          path: clang
+          lfs: true
+          depth: 1
+
+      - name: Set Environment Path
         run: |
-          mkdir -p ~/clang
-          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git ~/clang
-          echo "$HOME/clang/bin" >> $GITHUB_PATH
+          echo "$GITHUB_WORKSPACE/clang/bin" >> $GITHUB_PATH
 
       - name: Generate defconfig
         working-directory: kernel
