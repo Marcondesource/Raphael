@@ -41,6 +41,11 @@ jobs:
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
 
+      - name: Setup KernelSU
+        working-directory: kernel
+        run: |
+          curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
+          
       - name: Setup ProtonClang
         uses: actions/checkout@v4
         with:
