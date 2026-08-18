@@ -1,4 +1,4 @@
-name: Build Kernel
+Name: Build Kernel
 on:
   workflow_dispatch:
     inputs:
@@ -39,26 +39,26 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel    
+          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
+
       - name: Setup ProtonClang
         run: |
           mkdir -p ~/clang
           git clone --depth=1 https://github.com/kdrag0n/proton-clang.git ~/clang
-          
-            - name: Generate defconfig
+          echo "$HOME/clang/bin" >> $GITHUB_PATH
+
+      - name: Generate defconfig
         working-directory: kernel
-  run: |
+        run: |
           mkdir -p out
           sh scripts/kconfig/merge_config.sh -m -O out/ arch/arm64/configs/vendor/sm8150-perf_defconfig arch/arm64/configs/vendor/xiaomi/sm8150-common.config arch/arm64/configs/vendor/xiaomi/raphael.config
           echo "CONFIG_CC_STACKPROTECTOR_STRONG=n" >> out/.config
           make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 olddefconfig
-          
-          
-          - name: Build Kernel
-          working-directory: kernel
-          run: |
+
+      - name: Build Kernel
+        working-directory: kernel
+        run: |
           make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbs
-          
 
       - name: Prepare AnyKernel3
         run: |
@@ -77,11 +77,9 @@ jobs:
             Device: Raphael
             Branch: ${{ steps.vars.outputs.kernel_branch }}
             Kernel: Ayanami
-            Compiler: Neutron Clang
+            Compiler: Proton Clang
             Build #${{ github.run_number }}
           files: |
             output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    
