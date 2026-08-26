@@ -40,11 +40,6 @@ jobs:
       - name: Checkout Kernel
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
-
-      - name: Setup KernelSU
-        working-directory: kernel
-        run: |
-          curl -LSs "https://github.com/ReSukiSU/ReSukiSU/raw/refs/heads/main/kernel/setup.sh" | bash -s
           
       - name: Setup ProtonClang
         uses: actions/checkout@v4
@@ -74,8 +69,10 @@ jobs:
       - name: Prepare AnyKernel3
         run: |
           mkdir -p output
-          git clone --depth=1 https://github.com/MatrixhKa/AnyKernel3.git AnyKernel3
-          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/Image.gz-dtb
+          git clone --depth=1 https://github.com/Marcondesource/AnyKernel3.git AnyKernel3
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/ 2>/dev/null || cp kernel/out/arch/arm64/boot/Image.gz AnyKernel3/
+          cp kernel/out/arch/arm64/boot/dtbo.img AnyKernel3/ 2>/dev/null || true
+          find kernel/out/arch/arm64/boot/dts/ -name "*.dtb" -exec cp {} AnyKernel3/dtb \; 2>/dev/null || true
           cd AnyKernel3
           zip -r9 ../output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
 
