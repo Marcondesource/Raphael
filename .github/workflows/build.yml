@@ -7,11 +7,11 @@ on:
         required: true
         type: choice
         options:
-          - lineage-18.1
-          - lineage-19.1
-          - lineage-22.2
-          - lineage-23.2
-        default: lineage-22.2
+          - 13.0-raphael
+          - 14.0-raphael
+          - 15.0-raphael
+          - 16.0-raphael
+        default: 13.0-raphael
 permissions:
   contents: write
 jobs:
@@ -21,8 +21,8 @@ jobs:
       - name: Resolve branch and zip name
         id: vars
         run: |
-          if [ "${{ inputs.branch }}" = "lineage-22.2" ]; then
-            echo "kernel_branch=lineage-22.2" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.branch }}" = "13.0-raphael" ]; then
+            echo "kernel_branch=13.0-raphael" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-raphael" >> "$GITHUB_OUTPUT"
           else
             echo "kernel_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
@@ -39,7 +39,7 @@ jobs:
 
       - name: Checkout Kernel
         run: |
-          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_raphael.git --depth=1 kernel
+          git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/android_kernel_xiaomi_sm8150 --depth=1 kernel
           
       - name: Setup ProtonClang
         uses: actions/checkout@v4
