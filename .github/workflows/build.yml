@@ -64,7 +64,7 @@ jobs:
       - name: Build Kernel
         working-directory: kernel
         run: |
-          make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbs
+          make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbs dtbo.img
 
       - name: Prepare AnyKernel3
         run: |
