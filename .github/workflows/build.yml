@@ -7,11 +7,12 @@ on:
         required: true
         type: choice
         options:
+          - 13.0-raphael_ksu
           - 13.0-raphael
           - 14.0-raphael
           - 15.0-raphael
           - 16.0-raphael
-        default: 13.0-raphael
+        default: 13.0-raphael_ksu
 permissions:
   contents: write
 jobs:
@@ -21,8 +22,8 @@ jobs:
       - name: Resolve branch and zip name
         id: vars
         run: |
-          if [ "${{ inputs.branch }}" = "13.0-raphael" ]; then
-            echo "kernel_branch=13.0-raphael" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.branch }}" = "13.0-raphael_ksu" ]; then
+            echo "kernel_branch=13.0-raphael_ksu" >> "$GITHUB_OUTPUT"
             echo "zip_suffix=Kona-raphael" >> "$GITHUB_OUTPUT"
           else
             echo "kernel_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
