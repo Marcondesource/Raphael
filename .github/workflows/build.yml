@@ -58,8 +58,8 @@ jobs:
         working-directory: kernel
         run: |
           mkdir -p out
-          make O=out ARCH=arm64 raphael_defconfig
-          make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 olddefconfig
+          make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- raphael_defconfig
+          make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- olddefconfig
 
       - name: Build Kernel
         working-directory: kernel
