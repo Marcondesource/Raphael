@@ -33,10 +33,11 @@ jobs:
           fi
 
       - name: Install required packages
-        timeout-minutes: 15
+        timeout-minutes: 45
         run: |
-          sudo apt-get update -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          APT_OPTS="-o Acquire::Retries=8 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          sudo apt-get $APT_OPTS update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get $APT_OPTS install -y \
                     build-essential bc flex bison libssl-dev libelf-dev libncurses5-dev \
                     zstd dwarves cpio python-is-python3 device-tree-compiler curl zip gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu
 
