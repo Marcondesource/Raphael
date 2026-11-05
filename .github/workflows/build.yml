@@ -39,8 +39,11 @@ jobs:
       - name: Checkout Kernel
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/kernel_xiaomi_raphael --depth=1 kernel
-          
-      
+          # Neutron's current clang (24.x) no longer ships the MLGO regalloc model,
+          # and requesting it is a fatal error. Drop the hardcoded advisor flag.
+          sed -i '/regalloc-enable-advisor/d' kernel/Makefile
+          grep -n "regalloc-enable-advisor" kernel/Makefile || echo "MLGO regalloc flags removed"
+
       - name: Setup Neutron Clang via AntMan
         run: |
           mkdir -p $HOME/tc/neutron-clang
@@ -82,7 +85,7 @@ jobs:
             Device: Raphael
             Branch: ${{ steps.vars.outputs.kernel_branch }}
             Kernel: Ayanami
-            Compiler: Proton Clang
+            Compiler: Neutron Clang
             Build #${{ github.run_number }}
           files: |
             output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip
