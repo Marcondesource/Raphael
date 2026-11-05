@@ -48,7 +48,16 @@ jobs:
           lfs: true
           depth: 1
 
-      - name: Set Environment Path
+      - name: Set Environment P- name: Patch Kernel Config Flags for Clang 13
+        working-directory: kernel
+        run: |
+          # Desativa o LTO unificado caso cause erro no Clang antigo
+          sed -i 's/CONFIG_LTO_CLANG_THIN=y/# CONFIG_LTO_CLANG_THIN is not set/g' arch/arm64/configs/raphael_defconfig || true
+          sed -i 's/CONFIG_LTO_CLANG_FULL=y/# CONFIG_LTO_CLANG_FULL is not set/g' arch/arm64/configs/raphael_defconfig || true
+          sed -i 's/CONFIG_LTO=y/# CONFIG_LTO is not set/g' arch/arm64/configs/raphael_defconfig || true
+          
+          # Remove dependência estrita de zero-init se presente
+          echo "CONFIG_CC_HAS_AUTO_VAR_INIT_ZERO=y" >> arch/arm64/configs/raphael_defconfigath
         run: |
           echo "$GITHUB_WORKSPACE/clang/bin" >> $GITHUB_PATH
 
