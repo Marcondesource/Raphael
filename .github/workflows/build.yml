@@ -48,7 +48,6 @@ jobs:
           curl -LSs https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman -o antman
           chmod +x antman
           ./antman -S
-          ./antman --patch-glibc
           
       - name: Generate defconfig
         working-directory: kernel
