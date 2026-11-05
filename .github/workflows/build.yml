@@ -64,15 +64,15 @@ jobs:
         working-directory: kernel
         run: |
           export PATH="$HOME/tc/neutron-clang/bin:$PATH" 
-          make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- KCFLAGS="-Wno-error=vla-extension -Wno-error=unused-command-line-argument" Image.gz-dtb dtbs
+          make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- KCFLAGS="-Wno-error=vla-extension -Wno-error=unused-command-line-argument" Image.gz-dtb dtbo.img dtbs
 
       - name: Prepare AnyKernel3
         run: |
           mkdir -p output
-          git clone --depth=1 https://github.com/Marcondesource/AnyKernel3.git AnyKernel3
-          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/ 2>/dev/null || cp kernel/out/arch/arm64/boot/Image.gz AnyKernel3/
-          find kernel/out/ -name "dtbo.img" -exec cp {} AnyKernel3/ \; 2>/dev/null || true
-          find kernel/out/arch/arm64/boot/dts/vendor/qcom/ -name "*.dtb" -exec cat {} + > AnyKernel3/dtb 2>/dev/null || find kernel/out/arch/arm64/boot/dts/ -name "*.dtb" -exec cat {} + > AnyKernel3/dtb 2>/dev/null || true
+          git clone --depth=1 https://github.com/SOVIET-ANDROID/AnyKernel3.git AnyKernel3
+          cp kernel/out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
+          cp kernel/out/arch/arm64/boot/dtbo.img AnyKernel3/
+          ls -lh AnyKernel3/Image.gz-dtb AnyKernel3/dtbo.img
           cd AnyKernel3
           zip -r9 ../output/AnyKernel3-${{ steps.vars.outputs.zip_suffix }}-${{ github.run_number }}.zip . -x ".git/*" ".github/*" "README.md" "*.zip"
 
