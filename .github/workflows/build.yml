@@ -40,35 +40,28 @@ jobs:
         run: |
           git clone -b ${{ steps.vars.outputs.kernel_branch }} https://github.com/Marcondesource/kernel_xiaomi_raphael --depth=1 kernel
           
-      - name: Setup ProtonClang
-        uses: actions/checkout@v4
-        with:
-          repository: kdrag0n/proton-clang
-          path: clang
-          lfs: true
-          depth: 1
-
-      - name: Patch Kernel Config Flags for Clang 13
-        working-directory: kernel
+      
+      - name: Setup Neutron Clang via AntMan
         run: |
-          # Desativa o LTO unificado caso cause erro no Clang antigo
-          sed -i 's/CONFIG_LTO_CLANG_THIN=y/# CONFIG_LTO_CLANG_THIN is not set/g' arch/arm64/configs/raphael_defconfig || true
-          sed -i 's/CONFIG_LTO_CLANG_FULL=y/# CONFIG_LTO_CLANG_FULL is not set/g' arch/arm64/configs/raphael_defconfig || true
-          sed -i 's/CONFIG_LTO=y/# CONFIG_LTO is not set/g' arch/arm64/configs/raphael_defconfig || true
+          mkdir -p $HOME/tc/neutron-clang
+          cd $HOME/tc/neutron-clang
+          curl -LSs https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman -o antman
+          chmod +x antman
+          ./antman -S
+          ./antman --patch-glibc
           
-          # Remove dependência estrita de zero-init se presente
-          echo "CONFIG_CC_HAS_AUTO_VAR_INIT_ZERO=y" >> arch/arm64/configs/raphael_defconfig
-
       - name: Generate defconfig
         working-directory: kernel
         run: |
           mkdir -p out
+          export PATH="$HOME/tc/neutron-clang/bin:$PATH"
           make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- raphael_defconfig
           make O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- olddefconfig
 
       - name: Build Kernel
         working-directory: kernel
         run: |
+          export PATH="$HOME/tc/neutron-clang/bin:$PATH" \
           make -j$(nproc --all) O=out ARCH=arm64 CC=clang HOSTCC=clang HOSTCXX=clang++ LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- Image.gz-dtb dtbs
 
       - name: Prepare AnyKernel3
